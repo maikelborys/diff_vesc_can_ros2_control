@@ -1,9 +1,0 @@
-<library path="ros2_control_diffbot_original">
-  <class name="ros2_control_diffbot_original/DiffBotSystemHardware"
-         type="ros2_control_diffbot_original::DiffBotSystemHardware"
-         base_class_type="hardware_interface::SystemInterface">
-    <description>
-      The ros2_control DiffBot original demo using a system hardware interface-type. It uses velocity command and position state interface. This is a reference implementation for differential-drive mobile robots.
-    </description>
-  </class>
-</library>

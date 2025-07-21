@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ROS2_CONTROL_DIFFBOT_ORIGINAL__DIFFBOT_SYSTEM_HPP_
-#define ROS2_CONTROL_DIFFBOT_ORIGINAL__DIFFBOT_SYSTEM_HPP_
+#ifndef DIFF_VESC_CAN_ROS2_CONTROL__DIFFBOT_SYSTEM_HPP_
+#define DIFF_VESC_CAN_ROS2_CONTROL__DIFFBOT_SYSTEM_HPP_
 
 #include <memory>
 #include <string>
@@ -31,7 +31,7 @@
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 
-namespace ros2_control_diffbot_original
+namespace diff_vesc_can_ros2_control
 {
 class DiffBotSystemHardware : public hardware_interface::SystemInterface
 {
@@ -84,6 +84,6 @@ private:
   std::vector<double> hw_velocities_;
 };
 
-}  // namespace ros2_control_diffbot_original
+}  // namespace diff_vesc_can_ros2_control
 
-#endif  // ROS2_CONTROL_DIFFBOT_ORIGINAL__DIFFBOT_SYSTEM_HPP_
+#endif  // DIFF_VESC_CAN_ROS2_CONTROL__DIFFBOT_SYSTEM_HPP_

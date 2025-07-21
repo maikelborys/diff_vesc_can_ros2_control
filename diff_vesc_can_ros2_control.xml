@@ -1,0 +1,9 @@
+<library path="diff_vesc_can_ros2_control">
+  <class name="diff_vesc_can_ros2_control/DiffBotSystemHardware"
+         type="diff_vesc_can_ros2_control::DiffBotSystemHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The ros2_control DiffBot implementation ready for VESC integration. It uses velocity command and position state interface. This is based on the reference implementation for differential-drive mobile robots.
+    </description>
+  </class>
+</library>
