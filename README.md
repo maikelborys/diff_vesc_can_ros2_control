@@ -1,25 +1,27 @@
-# ros2_control_diffbot_original package from ros2_control
+# diff_vesc_can_ros2_control - Independent VESC CAN Robot Control Package
 
-
-**DiffBot** (*Differential Mobile Robot*) is a simple mobile base with differential drive kinematics. The robot is essentially a box that moves according to differential drive principles, making it perfect for learning and prototyping.
+**DiffBot VESC CAN** (*Differential Mobile Robot with VESC CAN Control*) is a complete ros2_control implementation for differential drive robots using VESC motor controllers over CAN bus. This package provides a self-contained, independent implementation with no external dependencies.
 
 ## Features
 
-- ✅ **Complete ros2_control Implementation**: Hardware interface, controllers, and state management
-- ✅ **Differential Drive Kinematics**: Proper implementation of diff drive control
-- ✅ **RViz Visualization**: Real-time robot visualization and control
-- ✅ **Odometry Publishing**: Accurate pose estimation and tracking
-- ✅ **Command Interface**: TwistStamped message support for velocity commands
+- ✅ **VESC CAN Integration**: Direct interface with VESC motor controllers via CAN bus
+- ✅ **Complete Independence**: No external dependencies - fully self-contained package  
+- ✅ **Differential Drive Control**: Proper implementation of diff drive kinematics
+- ✅ **Hardware Interface**: Real VESC hardware integration with fallback to mock hardware
+- ✅ **RViz Visualization**: Real-time robot visualization with independent URDF and materials
+- ✅ **Odometry Publishing**: Accurate pose estimation and velocity tracking
+- ✅ **TwistStamped Commands**: Modern ROS2 message interface with timestamp support
 - ✅ **Joint State Broadcasting**: Real-time wheel position and velocity feedback
-- ✅ **Educational Framework**: Clean, well-documented code for learning ros2_control
+- ✅ **Production Ready**: Clean, tested implementation for real robot deployment
 
 ## Architecture
 
 ### Hardware Interface
-- **DiffBotSystemHardware**: Implements `hardware_interface::SystemInterface`
+- **DiffBotSystemHardware**: Implements `hardware_interface::SystemInterface` for VESC CAN
 - **State Interfaces**: Position and velocity for each wheel joint
-- **Command Interfaces**: Velocity commands for each wheel
-- **Lifecycle Management**: Proper activation/deactivation sequences
+- **Command Interfaces**: Velocity commands sent directly to VESC controllers
+- **CAN Communication**: Direct interface with VESC motor controllers
+- **Lifecycle Management**: Proper activation/deactivation with VESC initialization
 
 ### Controllers
 - **diff_drive_controller**: Converts Twist commands to wheel velocities
@@ -33,21 +35,71 @@
 
 ## Quick Start
 
+## Quick Start
+
 ### 1. Build the Package
 ```bash
 cd /home/robot/robot_ws
-colcon build --packages-select ros2_control_diffbot_original
+colcon build --packages-select diff_vesc_can_ros2_control
 source install/setup.bash
 ```
 
-### 2. Launch the Demo
+### 2. Launch Robot Visualization
 ```bash
-ros2 launch ros2_control_diffbot_original diffbot.launch.py
+ros2 launch diff_vesc_can_ros2_control view_robot.launch.py
+```
+
+### 3. Launch Complete Robot System
+```bash
+ros2 launch diff_vesc_can_ros2_control diffbot.launch.py
+```
+
+### 4. Control the Robot
+```bash
+# Send velocity commands (linear.x = 0.2 m/s, angular.z = 0.1 rad/s)
+ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped \
+  "{header: {stamp: now, frame_id: base_link}, \
+    twist: {linear: {x: 0.2, y: 0.0, z: 0.0}, \
+           angular: {x: 0.0, y: 0.0, z: 0.1}}}" --rate 1
+
+# Stop the robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped \
+  "{header: {stamp: now, frame_id: base_link}, \
+    twist: {linear: {x: 0.0, y: 0.0, z: 0.0}, \
+           angular: {x: 0.0, y: 0.0, z: 0.0}}}" --once
+```
+
+## Package Structure
+
+```
+diff_vesc_can_ros2_control/
+├── bringup/
+│   ├── config/
+│   │   └── diffbot_controllers.yaml     # Controller configuration
+│   └── launch/
+│       └── diffbot.launch.py           # Main system launch
+├── description/
+│   ├── launch/
+│   │   └── view_robot.launch.py        # Robot visualization
+│   ├── ros2_control/
+│   │   └── diffbot.ros2_control.xacro  # Hardware interface config
+│   └── urdf/
+│       ├── diffbot.urdf.xacro          # Robot description
+│       ├── diffbot_description.urdf.xacro
+│       └── diffbot.materials.xacro     # Visual materials
+├── hardware/
+│   ├── include/diff_vesc_can_ros2_control/
+│   │   └── diffbot_system.hpp          # Hardware interface header
+│   └── diffbot_system.cpp              # VESC hardware implementation
+├── rviz/
+│   ├── diffbot.rviz                    # RViz configuration
+│   └── diffbot_view.rviz              # Visualization config
+└── README.md                           # This file
 ```
 
 This will start:
-- Controller manager
-- Hardware interface (simulated)
+- Controller manager with VESC CAN interface
+- Hardware interface (real VESC or mock)
 - Differential drive controller
 - Joint state broadcaster
 - RViz visualization
