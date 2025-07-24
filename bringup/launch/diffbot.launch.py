@@ -39,10 +39,18 @@ def generate_launch_description():
             description="Start robot with mock hardware mirroring command to its states.",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "use_vesc_can",
+            default_value="false",
+            description="Use VESC CAN hardware interface.",
+        )
+    )
 
     # Initialize Arguments
     gui = LaunchConfiguration("gui")
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
+    use_vesc_can = LaunchConfiguration("use_vesc_can")
 
     # Get URDF via xacro
     robot_description_content = Command(
@@ -55,6 +63,9 @@ def generate_launch_description():
             " ",
             "use_mock_hardware:=",
             use_mock_hardware,
+            " ",
+            "use_vesc_can:=",
+            use_vesc_can,
         ]
     )
     robot_description = {"robot_description": robot_description_content}

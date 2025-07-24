@@ -1,33 +1,65 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="diffbot_ros2_control" params="name prefix use_mock_hardware">
+  <xacro:macro name="diffbot_ros2_control" params="name prefix use_mock_hardware use_vesc_can">
 
-    <ros2_control name="${name}" type="system">
-      <xacro:unless value="${use_mock_hardware}">
-        <hardware>
-          <plugin>diff_vesc_can_ros2_control/DiffBotSystemHardware</plugin>
-          <param name="example_param_hw_start_duration_sec">0</param>
-          <param name="example_param_hw_stop_duration_sec">3.0</param>
-        </hardware>
-      </xacro:unless>
-      <xacro:if value="${use_mock_hardware}">
-        <hardware>
-          <plugin>mock_components/GenericSystem</plugin>
-          <param name="calculate_dynamics">true</param>
-        </hardware>
-      </xacro:if>
-      <joint name="${prefix}left_wheel_joint">
-        <command_interface name="velocity"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-      <joint name="${prefix}right_wheel_joint">
-        <command_interface name="velocity"/>
-        <state_interface name="position"/>
-        <state_interface name="velocity"/>
-      </joint>
-    </ros2_control>
+    <xacro:if value="${use_vesc_can}">
+      <ros2_control name="VescCanDiffBot" type="system">
+        <xacro:if value="${use_mock_hardware}">
+          <hardware>
+            <plugin>mock_components/GenericSystem</plugin>
+            <param name="calculate_dynamics">true</param>
+          </hardware>
+        </xacro:if>
+        <xacro:unless value="${use_mock_hardware}">
+          <hardware>
+            <plugin>diff_vesc_can_ros2_control/VescCanDiffBotSystemHardware</plugin>
+            <param name="can_interface">can0</param>
+            <param name="left_vesc_id">28</param>
+            <param name="right_vesc_id">46</param>
+            <param name="wheel_radius">0.075</param>
+            <param name="wheel_separation">0.37</param>
+          </hardware>
+        </xacro:unless>
+        <joint name="${prefix}left_wheel_joint">
+          <command_interface name="velocity"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        <joint name="${prefix}right_wheel_joint">
+          <command_interface name="velocity"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+    </xacro:if>
+    <xacro:unless value="${use_vesc_can}">
+      <ros2_control name="${name}" type="system">
+        <xacro:if value="${use_mock_hardware}">
+          <hardware>
+            <plugin>mock_components/GenericSystem</plugin>
+            <param name="calculate_dynamics">true</param>
+          </hardware>
+        </xacro:if>
+        <xacro:unless value="${use_mock_hardware}">
+          <hardware>
+            <plugin>diff_vesc_can_ros2_control/DiffBotSystemHardware</plugin>
+            <param name="example_param_hw_start_duration_sec">0</param>
+            <param name="example_param_hw_stop_duration_sec">3.0</param>
+          </hardware>
+        </xacro:unless>
+        <joint name="${prefix}left_wheel_joint">
+          <command_interface name="velocity"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        <joint name="${prefix}right_wheel_joint">
+          <command_interface name="velocity"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+    </xacro:unless>
 
   </xacro:macro>
 

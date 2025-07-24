@@ -28,6 +28,7 @@ add_library(
   diff_vesc_can_ros2_control
   SHARED
   hardware/diffbot_system.cpp
+  hardware/vesc_can_diffbot_system.cpp
 )
 target_compile_features(diff_vesc_can_ros2_control PUBLIC cxx_std_17)
 target_include_directories(diff_vesc_can_ros2_control PUBLIC
