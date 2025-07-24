@@ -17,8 +17,8 @@
             <param name="can_interface">can0</param>
             <param name="left_vesc_id">28</param>
             <param name="right_vesc_id">46</param>
-            <param name="wheel_radius">0.075</param>
-            <param name="wheel_separation">0.37</param>
+            <param name="wheel_radius">0.1778</param>
+            <param name="wheel_separation">0.370</param>
           </hardware>
         </xacro:unless>
         <joint name="${prefix}left_wheel_joint">

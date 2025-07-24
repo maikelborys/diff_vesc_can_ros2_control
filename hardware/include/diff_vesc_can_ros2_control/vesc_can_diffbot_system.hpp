@@ -46,6 +46,9 @@ private:
   // Logger and clock
   std::shared_ptr<rclcpp::Logger> logger_;
   std::shared_ptr<rclcpp::Clock> clock_;
+
+  // CAN socket
+  int can_sock_ = -1;
 };
 
 }  // namespace diff_vesc_can_ros2_control
