@@ -57,6 +57,7 @@ ros2 launch diff_vesc_can_ros2_control diffbot.launch.py
 ### 4. Control the Robot
 ```bash
 # Send velocity commands (linear.x = 0.2 m/s, angular.z = 0.1 rad/s)
+# ************************ WORKS *********************************
 ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped \
   "{header: {stamp: now, frame_id: base_link}, \
     twist: {linear: {x: 0.2, y: 0.0, z: 0.0}, \
