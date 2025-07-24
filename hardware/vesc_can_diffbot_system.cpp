@@ -133,9 +133,9 @@ hardware_interface::return_type VescCanDiffBotSystemHardware::write(const rclcpp
     "[DEBUG] hw_commands: left=%.6f rad/s (%.6f m/s) right=%.6f rad/s (%.6f m/s)",
     hw_commands_[0], left_mps, hw_commands_[1], right_mps);
 
-  // Empirical calibration: duty_cycle = velocity_mps / 7.857
-  double left_duty = std::clamp(left_mps / 7.857, -1.0, 1.0);
-  double right_duty = std::clamp(right_mps / 7.857, -1.0, 1.0);
+  // Empirical calibration: duty_cycle = (velocity_mps / 7.857) / 10.0 ITS APPROXIMATE ************************
+  double left_duty = std::clamp((left_mps / 7.857) / 10.0, -1.0, 1.0);
+  double right_duty = std::clamp((right_mps / 7.857) / 10.0, -1.0, 1.0);
   RCLCPP_INFO(rclcpp::get_logger("vesc_can_diffbot_system"),
     "[DEBUG] duty_cycle: left=%.6f right=%.6f", left_duty, right_duty);
 
