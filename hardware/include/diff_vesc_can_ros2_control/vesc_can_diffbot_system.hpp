@@ -12,6 +12,10 @@
 #include <string>
 #include <vector>
 
+#include <thread>
+#include <atomic>
+#include <optional>
+
 namespace diff_vesc_can_ros2_control
 {
 
@@ -49,6 +53,16 @@ private:
 
   // CAN socket
   int can_sock_ = -1;
+
+  // CAN read thread and odometry state
+  std::thread can_read_thread_;
+  std::atomic<bool> can_read_running_{false};
+  std::optional<int32_t> left_tach_initial_;
+  std::optional<int32_t> right_tach_initial_;
+  int32_t left_tach_current_ = 0;
+  int32_t right_tach_current_ = 0;
+  double wheel_circumference_ = 0.0;
+  double distance_per_pulse_raw_ = 0.0;
 };
 
 }  // namespace diff_vesc_can_ros2_control

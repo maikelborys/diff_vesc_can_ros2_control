@@ -27,7 +27,7 @@ diffbot_base_controller:
     pose_covariance_diagonal : [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
     twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
 
-    open_loop: true
+    open_loop: false # Use encoder feedback for better accuracy, true for simulation
     enable_odom_tf: true
 
     cmd_vel_timeout: 0.5
@@ -41,8 +41,8 @@ diffbot_base_controller:
     linear.x.has_jerk_limits: false
     linear.x.max_velocity: 1.0 # Lowered for safety with larger wheels
     linear.x.min_velocity: -1.0
-    linear.x.max_acceleration: 0.5 # Lowered for safety
-    linear.x.min_acceleration: -0.5
+    linear.x.max_acceleration: 0.2 # Lowered for safety
+    linear.x.min_acceleration: -0.2
     linear.x.max_jerk: 0.0
     linear.x.min_jerk: 0.0
 

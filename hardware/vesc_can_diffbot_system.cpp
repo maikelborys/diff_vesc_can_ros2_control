@@ -20,6 +20,9 @@ namespace diff_vesc_can_ros2_control {
 
 VescCanDiffBotSystemHardware::VescCanDiffBotSystemHardware() : can_sock_(-1) {}
 VescCanDiffBotSystemHardware::~VescCanDiffBotSystemHardware() {
+  // Stop CAN read thread if running
+  can_read_running_ = false;
+  if (can_read_thread_.joinable()) can_read_thread_.join();
   if (can_sock_ >= 0) close(can_sock_);
 }
 
@@ -101,23 +104,78 @@ hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_activate(con
     hw_velocities_[i] = 0.0;
     hw_commands_[i] = 0.0;
   }
+  // Calculate wheel circumference and distance per pulse
+  wheel_circumference_ = M_PI * (2.0 * wheel_radius_); // wheel_diameter = 2 * radius
+  double ticks_per_mechanical_revolution = 138.0;
+  distance_per_pulse_raw_ = wheel_circumference_ / ticks_per_mechanical_revolution;
+  // Start CAN read thread for STATUS_5 parsing
+  can_read_running_ = true;
+  can_read_thread_ = std::thread([this]() {
+    while (can_read_running_) {
+      struct can_frame frame;
+      ssize_t nbytes = ::read(can_sock_, &frame, sizeof(frame));
+      if (nbytes == sizeof(frame)) {
+        uint32_t actual_id = frame.can_id & 0x1FFFFFFF;
+        if (actual_id == (0x1B00 + left_vesc_id_)) {
+          int32_t tach_raw = (frame.data[2] << 8) | frame.data[3];
+          if (tach_raw > 32767) tach_raw -= 65536;
+          if (!left_tach_initial_.has_value()) left_tach_initial_ = tach_raw;
+          left_tach_current_ = tach_raw;
+        } else if (actual_id == (0x1B00 + right_vesc_id_)) {
+          int32_t tach_raw = (frame.data[2] << 8) | frame.data[3];
+          if (tach_raw > 32767) tach_raw -= 65536;
+          if (!right_tach_initial_.has_value()) right_tach_initial_ = tach_raw;
+          right_tach_current_ = tach_raw;
+        }
+      }
+    }
+  });
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_deactivate(const rclcpp_lifecycle::State & previous_state) {
+  // Stop CAN read thread
+  can_read_running_ = false;
+  if (can_read_thread_.joinable()) can_read_thread_.join();
   // Optionally stop motors here
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::return_type VescCanDiffBotSystemHardware::read(const rclcpp::Time & time, const rclcpp::Duration & period) {
   // Dummy: just increment position by velocity * dt
-  double dt = period.seconds();
-  for (size_t i = 0; i < hw_positions_.size(); ++i) {
-    hw_positions_[i] += hw_velocities_[i] * dt;
-    // For now, just mirror command as velocity
+  // Instead of integrating velocity, use real tachometer readings for position
+  // This requires CAN STATUS_5 parsing in write() or a dedicated CAN read thread
+  // For demonstration, update positions if initial values are set
+  if (left_tach_initial_.has_value() && right_tach_initial_.has_value()) {
+    int32_t left_tach_diff = left_tach_current_ - left_tach_initial_.value();
+    int32_t right_tach_diff = right_tach_current_ - right_tach_initial_.value();
+    hw_positions_[0] = left_tach_diff * distance_per_pulse_raw_;
+    hw_positions_[1] = right_tach_diff * distance_per_pulse_raw_;
+  }
+  // Velocity can still be mirrored from command for now
+  for (size_t i = 0; i < hw_velocities_.size(); ++i) {
     hw_velocities_[i] = hw_commands_[i];
   }
   return hardware_interface::return_type::OK;
+  // --- CAN STATUS_5 parsing for real odometry ---
+  // This is a demonstration: you need to receive CAN frames and parse STATUS_5
+  // Example frame parsing:
+  // struct can_frame frame;
+  // ssize_t nbytes = ::read(can_sock_, &frame, sizeof(frame));
+  // if (nbytes == sizeof(frame)) {
+  //   uint32_t actual_id = frame.can_id & 0x1FFFFFFF;
+  //   if (actual_id == (0x1B00 + left_vesc_id_)) {
+  //     int32_t tach_raw = (frame.data[2] << 8) | frame.data[3];
+  //     if (tach_raw > 32767) tach_raw -= 65536;
+  //     if (!left_tach_initial_.has_value()) left_tach_initial_ = tach_raw;
+  //     left_tach_current_ = tach_raw;
+  //   } else if (actual_id == (0x1B00 + right_vesc_id_)) {
+  //     int32_t tach_raw = (frame.data[2] << 8) | frame.data[3];
+  //     if (tach_raw > 32767) tach_raw -= 65536;
+  //     if (!right_tach_initial_.has_value()) right_tach_initial_ = tach_raw;
+  //     right_tach_current_ = tach_raw;
+  //   }
+  // }
 }
 
 hardware_interface::return_type VescCanDiffBotSystemHardware::write(const rclcpp::Time & time, const rclcpp::Duration & period) {
