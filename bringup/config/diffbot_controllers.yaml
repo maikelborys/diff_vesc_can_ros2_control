@@ -13,9 +13,9 @@ diffbot_base_controller:
     left_wheel_names: ["left_wheel_joint"]
     right_wheel_names: ["right_wheel_joint"]
 
-    wheel_separation: 0.10
+    wheel_separation: 0.370
     #wheels_per_side: 1  # actually 2, but both are controlled by 1 signal
-    wheel_radius: 0.015
+    wheel_radius: 0.178
 
     wheel_separation_multiplier: 1.0
     left_wheel_radius_multiplier: 1.0
@@ -39,20 +39,20 @@ diffbot_base_controller:
     linear.x.has_velocity_limits: true
     linear.x.has_acceleration_limits: true
     linear.x.has_jerk_limits: false
-    linear.x.max_velocity: 1.0 # The following values are set lower than the defaults to prevent
-    linear.x.min_velocity: -1.0 # small robots from being too aggressive in acceleration/deceleration
-    linear.x.max_acceleration: 0.3 # was 1.0, but too high for small robots
-    linear.x.min_acceleration: -0.3 # was 1.0, but too high for small robots
+    linear.x.max_velocity: 1.0 # Lowered for safety with larger wheels
+    linear.x.min_velocity: -1.0
+    linear.x.max_acceleration: 0.5 # Lowered for safety
+    linear.x.min_acceleration: -0.5
     linear.x.max_jerk: 0.0
     linear.x.min_jerk: 0.0
 
     angular.z.has_velocity_limits: true
     angular.z.has_acceleration_limits: true
     angular.z.has_jerk_limits: false
-    angular.z.max_velocity: 1.0
-    angular.z.min_velocity: -1.0
-    angular.z.max_acceleration: 0.3 # was 1.0, but too high for small robots
-    angular.z.min_acceleration: -0.3 # was 1.0, but too high for small robots
+    angular.z.max_velocity: 0.5 # Lowered for safety with larger wheels
+    angular.z.min_velocity: -0.5
+    angular.z.max_acceleration: 0.3 # Lowered for safety
+    angular.z.min_acceleration: -0.3
     angular.z.max_jerk: 0.0
     angular.z.min_jerk: 0.0
     #use_stamped_vel: false  # Accept plain Twist messages on /cmd_vel
