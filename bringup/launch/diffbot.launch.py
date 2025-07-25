@@ -47,10 +47,19 @@ def generate_launch_description():
         )
     )
 
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "use_sim_time",
+            default_value="false",
+            description="Use simulation (Gazebo) clock if true.",
+        )
+    )
+
     # Initialize Arguments
     gui = LaunchConfiguration("gui")
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
     use_vesc_can = LaunchConfiguration("use_vesc_can")
+    use_sim_time = LaunchConfiguration("use_sim_time")
 
     # Get URDF via xacro
     robot_description_content = Command(
@@ -84,7 +93,7 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_controllers],
+        parameters=[robot_controllers, {"use_sim_time": use_sim_time}],
         output="both",
         remappings=[
             ("~/robot_description", "/robot_description"),
@@ -95,8 +104,11 @@ def generate_launch_description():
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="both",
-        parameters=[robot_description],
+        parameters=[robot_description, {"use_sim_time": use_sim_time}],
     )
+    # NOTE: The default velocity command topic is /cmd_vel (geometry_msgs/msg/TwistStamped or Twist)
+    # Example:
+    # ros2 topic pub /cmd_vel geometry_msgs/msg/TwistStamped '{header: {stamp: now, frame_id: base_link}, twist: {linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}}' --once
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",

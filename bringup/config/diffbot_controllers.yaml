@@ -1,7 +1,7 @@
 controller_manager:
   ros__parameters:
     update_rate: 10  # Hz
-
+    use_sim_time: false  # Default to false for hardware
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
@@ -55,3 +55,5 @@ diffbot_base_controller:
     angular.z.min_acceleration: -0.3 # was 1.0, but too high for small robots
     angular.z.max_jerk: 0.0
     angular.z.min_jerk: 0.0
+    #use_stamped_vel: false  # Accept plain Twist messages on /cmd_vel
+    use_sim_time: false  # Default to false for hardware. its commented beczuse stops working cmdvel 
