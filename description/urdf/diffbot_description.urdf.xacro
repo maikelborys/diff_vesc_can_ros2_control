@@ -32,7 +32,7 @@
       </geometry>
       <material name="orange"/>
     </visual>
-
+   <!--
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="${base_mass}"/>
@@ -41,6 +41,7 @@
         iyy="${base_mass / 12.0 * (base_height*base_height + base_width*base_width)}" iyz="0.0"
         izz="${base_mass / 12.0 * (base_width*base_width + base_length*base_length)}"/>
       </inertial>
+    -->
     </link>
 
     <joint name="${prefix}left_wheel_joint" type="continuous">

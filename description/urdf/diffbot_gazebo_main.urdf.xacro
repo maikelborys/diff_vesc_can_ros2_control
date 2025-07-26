@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="diffbot">
+
+  <xacro:include filename="$(find diff_vesc_can_ros2_control)/urdf/diffbot_gazebo.urdf.xacro" />
+
+  <xacro:diffbot_gazebo prefix="" />
+
+</robot> 

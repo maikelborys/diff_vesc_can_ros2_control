@@ -49,7 +49,7 @@ install(
   DESTINATION include/diff_vesc_can_ros2_control
 )
 install(
-  DIRECTORY description/launch description/ros2_control description/urdf rviz
+  DIRECTORY description/launch description/ros2_control description/urdf rviz worlds
   DESTINATION share/diff_vesc_can_ros2_control
 )
 install(
