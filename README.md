@@ -43,10 +43,11 @@ duty_cycle = velocity_mps / 7.857
 | Stop | 0% | 0 | `cansend can0 0000001C#00.00.00.00` |
 
 ### Tachometer Feedback (STATUS_5)
-- **Resolution**: 138 ticks per wheel revolution
-- **Distance per tick**: 8.1 mm
+- **Resolution**: 138 ticks per mechanical revolution (direct drive)
+- **Distance per tick**: 8.1 mm (1.117m ÷ 138 ticks)
 - **Feedback rate**: 100 Hz
-- **Format**: Electrical revolutions (divide by 6 for mechanical)
+- **Format**: Direct mechanical ticks (no conversion needed)
+- **Motor**: 23 poles with 3 Hall sensors = 6 electrical states per revolution
 
 ## 🚀 Quick Start
 

@@ -100,19 +100,19 @@ left_frame.data[3] = left_vesc_value & 0xFF;
 
 ### Tachometer Feedback Processing
 
-#### VESC STATUS_5 Message
+#### VESC STATUS_5 Message (Direct Drive)
 ```cpp
-// Read tachometer value (electrical revolutions)
+// Read tachometer value (direct ticks per mechanical revolution)
 int32_t tachometer_value = (frame.data[0] << 24) |
                           (frame.data[1] << 16) |
                           (frame.data[2] << 8) |
                           frame.data[3];
 
-// Convert to mechanical revolutions
-double mechanical_revs = tachometer_value / 6.0;
+// Direct drive: 138 ticks per mechanical revolution
+// No conversion needed - tachometer_value is already mechanical ticks
 
-// Convert to wheel position (radians)
-double wheel_position = mechanical_revs * 2.0 * M_PI;
+// Convert ticks to wheel position (radians)
+double wheel_position = (tachometer_value * 2.0 * M_PI) / 138.0;
 
 // Calculate velocity (rad/s)
 double wheel_velocity = (wheel_position - prev_position) / dt;
@@ -172,14 +172,15 @@ cmd_vel_timeout: 0.5         # Command timeout (s)
 
 # Calibration parameters
 duty_cycle_scale: 7.857      # Velocity to duty cycle scaling
-tachometer_resolution: 138   # Ticks per wheel revolution
+tachometer_resolution: 138   # Ticks per mechanical revolution (direct drive)
 ```
 
 ### Calibration Process
 1. **Wheel Parameters**: Measure physical wheel radius and separation
 2. **Duty Cycle Scaling**: Calibrate velocity to duty cycle conversion
-3. **Tachometer Resolution**: Verify encoder ticks per revolution
-4. **Timing**: Adjust control loop frequency if needed
+3. **Tachometer Resolution**: Verify 138 ticks per mechanical revolution (direct drive)
+4. **Distance per Tick**: Confirm 8.1 mm per tick (1.117m ÷ 138 ticks)
+5. **Timing**: Adjust control loop frequency if needed
 
 ## 🚨 Safety Features
 
