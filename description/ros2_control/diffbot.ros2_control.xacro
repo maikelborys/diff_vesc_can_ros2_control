@@ -19,6 +19,8 @@
             <param name="right_vesc_id">46</param>
             <param name="wheel_radius">0.1778</param>
             <param name="wheel_separation">0.370</param>
+            <param name="max_linear_speed_mps">1.0</param>
+            <param name="ticks_per_mechanical_revolution">138.0</param>
           </hardware>
         </xacro:unless>
         <joint name="${prefix}left_wheel_joint">
