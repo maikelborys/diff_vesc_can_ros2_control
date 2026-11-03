@@ -19,6 +19,7 @@ from launch.event_handlers import OnProcessExit
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution, LaunchConfiguration
 
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
 
@@ -42,7 +43,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "use_vesc_can",
-            default_value="false",
+            default_value="true",
             description="Use VESC CAN hardware interface.",
         )
     )
@@ -54,20 +55,32 @@ def generate_launch_description():
             description="Use simulation (Gazebo) clock if true.",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "debug_output",
+            default_value="false",
+            description="Enable debug output from VESC CAN hardware interface.",
+        )
+    )
 
     # Initialize Arguments
     gui = LaunchConfiguration("gui")
     use_mock_hardware = LaunchConfiguration("use_mock_hardware")
     use_vesc_can = LaunchConfiguration("use_vesc_can")
     use_sim_time = LaunchConfiguration("use_sim_time")
+    debug_output = LaunchConfiguration("debug_output")
 
     # Get URDF via xacro
     robot_description_content = Command(
         [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            FindExecutable(name="xacro"),
             " ",
             PathJoinSubstitution(
-                [FindPackageShare("diff_vesc_can_ros2_control"), "urdf", "diffbot.urdf.xacro"]
+                [
+                    FindPackageShare("diff_vesc_can_ros2_control"),
+                    "urdf",
+                    "diffbot.urdf.xacro",
+                ]
             ),
             " ",
             "use_mock_hardware:=",
@@ -75,9 +88,14 @@ def generate_launch_description():
             " ",
             "use_vesc_can:=",
             use_vesc_can,
+            " ",
+            "debug_output:=",
+            debug_output,
         ]
     )
-    robot_description = {"robot_description": robot_description_content}
+    robot_description = {
+        "robot_description": ParameterValue(robot_description_content, value_type=str)
+    }
 
     robot_controllers = PathJoinSubstitution(
         [
@@ -93,12 +111,8 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
-        parameters=[robot_controllers, {"use_sim_time": use_sim_time}],
+        parameters=[robot_description, robot_controllers, {"use_sim_time": use_sim_time}],
         output="both",
-        remappings=[
-            ("~/robot_description", "/robot_description"),
-            ("/diffbot_base_controller/cmd_vel", "/cmd_vel"),
-        ],
     )
     robot_state_pub_node = Node(
         package="robot_state_publisher",
@@ -127,7 +141,13 @@ def generate_launch_description():
     robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
+        arguments=[
+            "diffbot_base_controller",
+            "--controller-manager",
+            "/controller_manager",
+            "--controller-ros-args",
+            "--ros-args --remap /diffbot_base_controller/cmd_vel:=/cmd_vel",
+        ],
     )
 
     # Delay rviz start after `joint_state_broadcaster`
