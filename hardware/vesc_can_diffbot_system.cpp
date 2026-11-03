@@ -35,8 +35,10 @@ VescCanDiffBotSystemHardware::~VescCanDiffBotSystemHardware() {
   }
 }
 
-hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_init(const hardware_interface::HardwareInfo & info) {
-  if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS) {
+hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_init(
+  const hardware_interface::HardwareComponentInterfaceParams & params)
+{
+  if (hardware_interface::SystemInterface::on_init(params) != hardware_interface::CallbackReturn::SUCCESS) {
     return hardware_interface::CallbackReturn::ERROR;
   }
 
