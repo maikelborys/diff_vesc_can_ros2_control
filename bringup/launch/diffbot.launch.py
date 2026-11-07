@@ -62,6 +62,19 @@ def generate_launch_description():
             description="Enable debug output from VESC CAN hardware interface.",
         )
     )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "controllers_file",
+            default_value=PathJoinSubstitution(
+                [
+                    FindPackageShare("diff_vesc_can_ros2_control"),
+                    "config",
+                    "diffbot_controllers.yaml",
+                ]
+            ),
+            description="YAML configuration file for controllers.",
+        )
+    )
 
     # Initialize Arguments
     gui = LaunchConfiguration("gui")
@@ -69,6 +82,7 @@ def generate_launch_description():
     use_vesc_can = LaunchConfiguration("use_vesc_can")
     use_sim_time = LaunchConfiguration("use_sim_time")
     debug_output = LaunchConfiguration("debug_output")
+    robot_controllers = LaunchConfiguration("controllers_file")
 
     # Get URDF via xacro
     robot_description_content = Command(
@@ -97,13 +111,6 @@ def generate_launch_description():
         "robot_description": ParameterValue(robot_description_content, value_type=str)
     }
 
-    robot_controllers = PathJoinSubstitution(
-        [
-            FindPackageShare("diff_vesc_can_ros2_control"),
-            "config",
-            "diffbot_controllers.yaml",
-        ]
-    )
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare("diff_vesc_can_ros2_control"), "rviz", "diffbot.rviz"]
     )
