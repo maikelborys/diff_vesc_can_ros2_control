@@ -100,32 +100,32 @@
       </inertial>
     </link>
 
-    <!-- LiDAR 2D (M200) -->
+    <!-- LiDAR 2D (D800) sulla torretta anteriore sotto il ground-plane RTK -->
     <joint name="${prefix}lidar_joint" type="fixed">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}lidar_link"/>
-      <origin xyz="0 0 ${wheel_radius + base_height + 0.01 + 0.003 + 0.025}" rpy="0 0 0"/>
+      <origin xyz="0.18 0 ${wheel_radius + base_height + 0.035}" rpy="0 0 0"/>
     </joint>
 
     <link name="${prefix}lidar_link">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="0.05" radius="0.04"/>
+          <cylinder length="0.035" radius="0.027"/>
         </geometry>
       </collision>
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="0.05" radius="0.04"/>
+          <cylinder length="0.035" radius="0.027"/>
         </geometry>
         <material name="white"/>
       </visual>
 
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.10"/>
+        <mass value="0.05"/>
         <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/>
       </inertial>
     </link>
@@ -160,138 +160,33 @@
       </inertial>
     </link>
 
-    <!-- GPS antenna -->
+    <!-- GPS RTK antenna (coassiale sopra LiDAR D800 con piatto ground-plane) -->
     <joint name="${prefix}gps_joint" type="fixed">
       <parent link="${prefix}base_link"/>
       <child link="${prefix}gps_link"/>
-      <origin xyz="0 0 ${wheel_radius + base_height + 0.01 + 0.003 + 0.005 + 0.05 + 0.005}" rpy="0 0 0"/>
+      <origin xyz="0.18 0 ${wheel_radius + base_height + 0.095}" rpy="0 0 0"/>
     </joint>
 
     <link name="${prefix}gps_link">
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="0.01" radius="0.03"/>
+          <cylinder length="0.01" radius="0.06"/>
         </geometry>
       </collision>
 
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <cylinder length="0.01" radius="0.03"/>
+          <cylinder length="0.01" radius="0.06"/>
         </geometry>
         <material name="green"/>
       </visual>
 
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.02"/>
+        <mass value="0.05"/>
         <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
-      </inertial>
-    </link>
-
-    <link name="${prefix}sonar_base_link"/>
-
-    <joint name="${prefix}sonar_base_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}sonar_base_link"/>
-      <origin xyz="0.2134 0 0.15" rpy="0 0 0"/>
-    </joint>
-
-    <!-- Sonar Array (Pico) - 3 sonar frontali -->
-    <!-- Sonar Sinistro (-15°) -->
-    <joint name="${prefix}sonar_left_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}sonar_left_link"/>
-      <origin xyz="0.3 -0.05 0.15" rpy="0 0 -0.523599"/> <!-- Sulla superficie anteriore: 5cm a sinistra -->
-    </joint>
-
-    <link name="${prefix}sonar_left_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <cylinder length="0.01" radius="0.0075"/> <!-- 1.5cm diametro, 1cm altezza -->
-        </geometry>
-      </collision>
-
-      <visual>
-        <origin xyz="0 0 0" rpy="0 1.5708 0"/> <!-- Ruotato 90° per base rivolta in avanti -->
-        <geometry>
-          <cylinder length="0.03" radius="0.02"/> <!-- 3cm altezza, 4cm diametro per visibilità -->
-        </geometry>
-        <material name="bright_red">
-          <color rgba="1.0 0.0 0.0 1.0"/> <!-- Rosso brillante opaco -->
-        </material>
-      </visual>
-
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.005"/>
-        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
-      </inertial>
-    </link>
-
-    <!-- Sonar Centrale (0°) -->
-    <joint name="${prefix}sonar_center_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}sonar_center_link"/>
-      <origin xyz="0.3 0 0.15" rpy="0 0 0"/> <!-- Sulla superficie anteriore: base_length/2 -->
-    </joint>
-
-    <link name="${prefix}sonar_center_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <cylinder length="0.01" radius="0.0075"/> <!-- 1.5cm diametro, 1cm altezza -->
-        </geometry>
-      </collision>
-
-      <visual>
-        <origin xyz="0 0 0" rpy="0 1.5708 0"/> <!-- Ruotato 90° per base rivolta in avanti -->
-        <geometry>
-          <cylinder length="0.03" radius="0.02"/> <!-- 3cm altezza, 4cm diametro per visibilità -->
-        </geometry>
-        <material name="bright_red">
-          <color rgba="1.0 0.0 0.0 1.0"/> <!-- Rosso brillante opaco -->
-        </material>
-      </visual>
-
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.005"/>
-        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
-      </inertial>
-    </link>
-
-    <!-- Sonar Destro (+15°) -->
-    <joint name="${prefix}sonar_right_joint" type="fixed">
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}sonar_right_link"/>
-      <origin xyz="0.3 0.05 0.15" rpy="0 0 0.523599"/> <!-- Sulla superficie anteriore: 5cm a destra -->
-    </joint>
-
-    <link name="${prefix}sonar_right_link">
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <cylinder length="0.01" radius="0.0075"/> <!-- 1.5cm diametro, 1cm altezza -->
-        </geometry>
-      </collision>
-
-      <visual>
-        <origin xyz="0 0 0" rpy="0 1.5708 0"/> <!-- Ruotato 90° per base rivolta in avanti -->
-        <geometry>
-          <cylinder length="0.03" radius="0.02"/> <!-- 3cm altezza, 4cm diametro per visibilità -->
-        </geometry>
-        <material name="bright_red">
-          <color rgba="1.0 0.0 0.0 1.0"/> <!-- Rosso brillante opaco -->
-        </material>
-      </visual>
-
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.005"/>
-        <inertia ixx="1e-8" ixy="0" ixz="0" iyy="1e-8" iyz="0" izz="1e-8"/>
       </inertial>
     </link>
 
