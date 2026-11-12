@@ -58,6 +58,12 @@ hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_init(
   if (info_.hardware_parameters.find("ticks_per_mechanical_revolution") != info_.hardware_parameters.end()) {
     ticks_per_mechanical_revolution_ = std::stod(info_.hardware_parameters.at("ticks_per_mechanical_revolution"));
   }
+  if (info_.hardware_parameters.find("motor_pole_pairs") != info_.hardware_parameters.end()) {
+    motor_pole_pairs_ = std::stoi(info_.hardware_parameters.at("motor_pole_pairs"));
+    if (motor_pole_pairs_ <= 0) {
+      motor_pole_pairs_ = 15;
+    }
+  }
 
   // Resize joint vectors
   size_t n_joints = info_.joints.size();
@@ -102,8 +108,8 @@ hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_init(
 
   RCLCPP_INFO(
     rclcpp::get_logger("vesc_can_diffbot_system"),
-    "CAN interface %s initialized (max_speed=%.2f m/s, ticks_rev=%.1f)",
-    can_interface_.c_str(), max_linear_speed_mps_, ticks_per_mechanical_revolution_);
+    "CAN interface %s initialized (max_speed=%.2f m/s, ticks_rev=%.1f, pole_pairs=%d)",
+    can_interface_.c_str(), max_linear_speed_mps_, ticks_per_mechanical_revolution_, motor_pole_pairs_);
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
@@ -150,6 +156,10 @@ hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_activate(con
   right_tach_current_.store(0);
   left_tach_initial_.store(0);
   right_tach_initial_.store(0);
+  left_erpm_received_.store(false);
+  right_erpm_received_.store(false);
+  left_erpm_current_.store(0);
+  right_erpm_current_.store(0);
 
   // Calculate wheel circumference and distance per pulse
   wheel_circumference_ = M_PI * (2.0 * wheel_radius_);
@@ -175,8 +185,24 @@ hardware_interface::CallbackReturn VescCanDiffBotSystemHardware::on_activate(con
 
       if (nbytes == sizeof(frame)) {
         uint32_t actual_id = frame.can_id & 0x1FFFFFFF;
+        // VESC CAN_PACKET_STATUS (0x09) is 0x0900 + vesc_id -> contains eRPM in bytes 0..3
+        if (actual_id == static_cast<uint32_t>(0x0900 + left_vesc_id_)) {
+          int32_t erpm_raw = (static_cast<int32_t>(frame.data[0]) << 24) |
+                             (static_cast<int32_t>(frame.data[1]) << 16) |
+                             (static_cast<int32_t>(frame.data[2]) << 8)  |
+                             (static_cast<int32_t>(frame.data[3]));
+          left_erpm_current_.store(erpm_raw);
+          left_erpm_received_.store(true);
+        } else if (actual_id == static_cast<uint32_t>(0x0900 + right_vesc_id_)) {
+          int32_t erpm_raw = (static_cast<int32_t>(frame.data[0]) << 24) |
+                             (static_cast<int32_t>(frame.data[1]) << 16) |
+                             (static_cast<int32_t>(frame.data[2]) << 8)  |
+                             (static_cast<int32_t>(frame.data[3]));
+          right_erpm_current_.store(erpm_raw);
+          right_erpm_received_.store(true);
+        }
         // VESC CAN_PACKET_STATUS_5 is 0x1B00 + vesc_id
-        if (actual_id == static_cast<uint32_t>(0x1B00 + left_vesc_id_)) {
+        else if (actual_id == static_cast<uint32_t>(0x1B00 + left_vesc_id_)) {
           // Parse full 32-bit big-endian tachometer reading (BUG-02)
           int32_t tach_raw = (static_cast<int32_t>(frame.data[0]) << 24) |
                              (static_cast<int32_t>(frame.data[1]) << 16) |
@@ -247,9 +273,17 @@ hardware_interface::return_type VescCanDiffBotSystemHardware::read(const rclcpp:
     hw_positions_[1] = static_cast<double>(right_tach_diff) * distance_per_pulse_raw_;
   }
 
-  // Velocity feedback mirrored from commands
-  for (size_t i = 0; i < hw_velocities_.size(); ++i) {
-    hw_velocities_[i] = hw_commands_[i];
+  // Real angular velocity feedback in rad/s computed from VESC STATUS_1 eRPM:
+  // omega [rad/s] = (erpm / pole_pairs) * (2 * pi / 60)
+  if (left_erpm_received_.load() && right_erpm_received_.load()) {
+    const double erpm_to_rad_s = M_PI / (static_cast<double>(motor_pole_pairs_) * 30.0);
+    hw_velocities_[0] = static_cast<double>(left_erpm_current_.load()) * erpm_to_rad_s;
+    hw_velocities_[1] = static_cast<double>(right_erpm_current_.load()) * erpm_to_rad_s;
+  } else {
+    // Fallback during initial boot before first STATUS_1 frame is received
+    for (size_t i = 0; i < hw_velocities_.size(); ++i) {
+      hw_velocities_[i] = hw_commands_[i];
+    }
   }
 
   return hardware_interface::return_type::OK;

@@ -44,6 +44,7 @@ private:
   double wheel_separation_;
   double max_linear_speed_mps_{7.857};
   double ticks_per_mechanical_revolution_{138.0};
+  int motor_pole_pairs_{15};
 
   // Joint data storage
   std::vector<double> hw_commands_;
@@ -68,6 +69,12 @@ private:
   std::atomic<int32_t> right_tach_initial_{0};
   std::atomic<bool> left_tach_initial_set_{false};
   std::atomic<bool> right_tach_initial_set_{false};
+
+  // Atomic variables for thread-safe eRPM readings (STATUS_1) for real velocity feedback
+  std::atomic<int32_t> left_erpm_current_{0};
+  std::atomic<int32_t> right_erpm_current_{0};
+  std::atomic<bool> left_erpm_received_{false};
+  std::atomic<bool> right_erpm_received_{false};
 
   double wheel_circumference_ = 0.0;
   double distance_per_pulse_raw_ = 0.0;
